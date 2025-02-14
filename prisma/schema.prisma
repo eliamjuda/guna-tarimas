@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model almacen {
+  id                 Int                 @id @default(autoincrement())
+  nombre             String              @unique(map: "Almacen_nombre_key")
+  tarimasDisponibles Int?                @default(0)
+  movimientos        movimientostarima[]
+}
+
+model movimientostarima {
+  id             Int        @id @default(autoincrement())
+  recibidoPor    String
+  almacenId      Int
+  almacen        almacen    @relation(fields: [almacenId], references: [id]) // ✅ Relación con "almacen"
+  tipoTarimaId   Int
+  tipotarima     tipotarima @relation(fields: [tipoTarimaId], references: [id])
+  tipoMovimiento String     @default("entrada")
+  cantidad       Int
+  fechaHora      DateTime   @default(now())
+
+  @@index([almacenId], map: "MovimientosTarima_almacenId_fkey")
+  @@index([tipoTarimaId], map: "MovimientosTarima_tipoTarimaId_fkey")
+}
+
+model tipotarima {
+  id          Int                 @id @default(autoincrement())
+  nombre      String              @unique(map: "TipoTarima_nombre_key")
+  movimientos movimientostarima[]
+}

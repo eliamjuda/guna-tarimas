@@ -1,101 +1,101 @@
-import Image from "next/image";
+'use client';
+import { InfoCard } from "./components/InfoCard";
+import styles from '@/app/ui/dashboard.module.css';
+import InventoryTable from "./components/InventoryTable";
+import AddMovimientosModal from "./components/AddMovimientosModal";
+import { useState } from 'react';
+import { useMovimientos } from "@/context/MovimientosContext";
+import Notification from "./components/Notificacion";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { agregarMovimiento, totalTarimas, tarimasPorTipo } = useMovimientos();
+  
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  const tarimaColors: { [key: string]: string } = {
+    total: '#3749bb', 
+    "Plastico": '#1db886',  
+    "Madera": '#ab791b',     
+    "Metalica": '#a3a5a5',     
+  };
+
+  const handleSubmitMovimiento = async (movimiento: {
+    recibidoPor: string;
+    almacenId: number;
+    tipoTarimaId: number;
+    tipoMovimiento: string;
+    cantidad: number;
+  }) => {
+    try {
+      const response = await fetch('/api/movimientos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(movimiento),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al registrar el movimiento');
+      }
+
+      const nuevoMovimiento = await response.json();
+      agregarMovimiento(nuevoMovimiento);
+
+      setNotification({ message: 'Movimiento registrado correctamente', type: 'success' });
+      handleCloseModal();
+    } catch (error) {
+      console.error(error);
+      setNotification({ message: 'Hubo un error al registrar el movimiento', type: 'error' });
+    }
+  };
+
+  const closeNotification = () => {
+    setNotification(null);
+  };
+
+  return (
+    <div className={styles.dashboardWrapper}>
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={closeNotification}
+        />
+      )}
+      <section className="flex space-x-5 mt-[50px]">
+        <InfoCard title="Total de tarimas" value={totalTarimas} color={tarimaColors.total} />
+
+        {Object.entries(tarimasPorTipo).map(([tipo, cantidad]) => (
+          <InfoCard key={tipo} title={`Total de tarimas de tipo: ${tipo}`} value={cantidad} color={tarimaColors[tipo]}  />
+        ))}
+      </section>
+      <section className="mt-[80px] flex flex-col">
+        <button onClick={handleOpenModal} className="ease-in duration-100 w-[150px] self-end bg-[#7888ec] hover:bg-[#5969cd] font-medium text-white text-800 00 mb-4 p-3 rounded-md">
+          <p className="text-[.7rem] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="ml-1 mr-1 icon icon-tabler icons-tabler-outline icon-tabler-plus">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+            Añadir registro
+          </p>
+        </button>
+        <AddMovimientosModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitMovimiento}
+        />
+        <InventoryTable />
+      </section>
     </div>
   );
 }

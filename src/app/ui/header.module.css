@@ -1,0 +1,50 @@
+.header {
+    padding: 20px 30px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgb(212, 210, 210);
+    display: flex;
+    width: 100dvw;
+    
+}
+
+.title {
+    width: 50%;
+    display: flex;
+    align-items: end;
+}
+
+.info {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+    padding: 0px 20px;
+}
+
+.userInfo {
+    margin: 10px 5px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.userInfoName {
+    line-height: 15px;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.userInfoType {
+    line-height: 20px;
+    font-size: .7rem;
+    font-weight: 200;
+}
+
+.photo {
+    margin-top: 25px;
+    width: 32px;
+    height: 30px;
+    background-color: #233296;
+    border-radius: 50%;
+}

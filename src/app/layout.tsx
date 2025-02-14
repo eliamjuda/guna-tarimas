@@ -1,16 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import "./ui/globals.css";
+import { montserrat } from '@/app/ui/fonts'
+import { Header } from "./components/Header"
+import Image from "next/image";
+import { MovimientosProvider } from "@/context/MovimientosContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,11 +16,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es-MX">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${montserrat.className} $antialiased`}
       >
-        {children}
+        <Header/>
+        <main>
+          <MovimientosProvider>
+          {children}
+          </MovimientosProvider>
+        </main>
+        <footer className="flex justify-center items-center space-x-4">
+          <p className="mt-10">Propiedad de</p>
+          <Image width="70" height="50" src="/logo_guna.png" alt='Logo Guna'/>
+        </footer>
       </body>
     </html>
   );
